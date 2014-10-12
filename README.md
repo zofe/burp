@@ -17,14 +17,22 @@ To make widgets that works driven by  uri-segments or query-string, without the 
 install via composer adding ```"zofe/burp": "dev-master"```
 
 
-use Zofe\Burp\Burp;
+## usage
 
 ```php
 
 <?php
-//widget routing - fired when url is for example:  /something/pg/2
+
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
     echo "current page is page: $page<br>";
+}));
+
+Burp::post('^user/', null, array('as'=>'user.create', function() {
+    echo "create new user";
+}));
+
+Burp::patch('^user/(\d+)', null, array('as'=>'user.update', function($id) {
+    echo "save changes for user $id";
 }));
 
 ```
