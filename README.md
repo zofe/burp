@@ -4,13 +4,13 @@ Burp
 Simple php __Router__ (or filter?) that can work with "URI", "QUERY STRING", or both.  
 It also has a simple __Event__ Listener implementation (to fire or queue application evens).
 
-You can use Rutto in your preferred framework (Including laravel), It does not pretend to be the only router, It just check your urls then fire or queue your events.
+You can use Burp in your preferred framework (Including laravel), It does not pretend to be the only router, It just check your urls then fire or queue your events.
 
 
 ## why
 
-the idea is to have a way to _work with your application urls_ and to define a "semantic" in your urls.<br />
-and to make widget that works with events fired by uri-segments or query-string  in an easy way.
+The idea is to have a way to _work with your application urls_ and to define a "semantic" in your urls.<br />
+To make widgets that works driven by  uri-segments or query-string, without without the need to have a classic controller.
 
 ## Installation
 
