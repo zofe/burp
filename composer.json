@@ -1,8 +1,8 @@
 {
-    "name": "zofe/masset",
-    "description": "Simple PHP router that works with query-string and uri",
+    "name": "zofe/burp",
+    "description": "Simple PHP router that works with query-string and uri-segments",
     "keywords": ["php","router", "filter", "front controller", "simple"],
-    "homepage": "https://github.com/zofe/rutto",
+    "homepage": "https://github.com/zofe/burp",
     "license": "MIT",
     "authors": [
         {
