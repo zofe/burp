@@ -25,6 +25,10 @@ install via composer adding ```"zofe/burp": "dev-master"```
 
 ...
 
+Burp::get('^user/(\d+)$', null, array('as'=>'user.show', function($id) {
+    echo "show user $id";
+}));
+
 Burp::post('^user$', null, array('as'=>'user.create', function() {
     echo "create new user";
 }));
