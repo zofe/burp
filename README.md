@@ -10,7 +10,7 @@ You can use Burp in your preferred framework (Including laravel), It does not pr
 ## why
 
 The idea is to have a way to _work with your application urls_ and to define a "semantic" in your urls.<br />
-To make widgets that works driven by  uri-segments or query-string, without without the need to have a classic controller.
+To make widgets that works driven by  uri-segments or query-string, without the need to have a classic controller.
 
 ## Installation
 
@@ -41,11 +41,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Zofe\Burp\Burp;
 
 
-//widget routing
+//widget routing - fired when url is for example:  /pg/2
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
     echo "current page is page: $page<br>";
 }));
 
+//widget routing - fired when url is for example: /?ord=-title
 Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $field) {
     $direction = ($direction == '-') ? "descending" : "ascending";
     echo "current sorting is on : $field ($direction)<br>";
@@ -53,7 +54,7 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 
 
 
-//home route
+//home route  - fired when uri is "/"  or "/pg/12" ...
 Burp::get('^/{page?}$', null, array('as'=>'home', function() {
 
     echo '<hr>';
@@ -66,10 +67,11 @@ Burp::get('^/{page?}$', null, array('as'=>'home', function() {
     echo '<hr>';
 }));
 
-//404 route
+//404 route  - fired only if there are defined strict routes (^..$)  
+//but all uncached
 Burp::missing(function() {
     header("HTTP/1.0 404 Not Found");
-    echo '404 :: Not Found';
+    echo '404 - Resource Not Found';
     die;
 });
 
