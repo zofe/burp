@@ -67,7 +67,7 @@ Burp::get('^/{page?}$', null, array('as'=>'home', function() {
   echo '<hr>';
 }));
 
-//404 route  - fired only if there are defined strict routes (^..$)  
+//404 route  - fired only if there are defined strict routes (i.e.: ^/$ or ^.*$)  
 //but all uncached
 Burp::missing(function() {
     header("HTTP/1.0 404 Not Found");
