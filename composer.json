@@ -1,0 +1,20 @@
+{
+    "name": "zofe/masset",
+    "description": "Simple PHP router that works with query-string and uri",
+    "keywords": ["php","router", "filter", "front controller", "simple"],
+    "homepage": "https://github.com/zofe/rutto",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Felice Ostuni",
+            "email": "felice.ostuni@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "autoload": {
+        "psr-0": {"Zofe\\Burp": "src/"}
+    },
+    "minimum-stability": "stable"
+}
