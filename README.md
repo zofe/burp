@@ -23,18 +23,17 @@ install via composer adding ```"zofe/burp": "dev-master"```
 
 <?php
 
-Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
-    echo "current page is page: $page<br>";
-}));
+...
 
-Burp::post('^user/', null, array('as'=>'user.create', function() {
+Burp::post('^user$', null, array('as'=>'user.create', function() {
     echo "create new user";
 }));
 
-Burp::patch('^user/(\d+)', null, array('as'=>'user.update', function($id) {
+Burp::patch('^user/(\d+)$', null, array('as'=>'user.update', function($id) {
     echo "save changes for user $id";
 }));
 
+Burp::dispatch();
 ```
 
 
