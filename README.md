@@ -61,8 +61,8 @@ Burp::get('^/{page?}$', null, array('as'=>'home', function() {
   echo '<a href="'.Burp::linkRoute('page',1).'">page 1</a><br>';
   echo '<a href="'.Burp::linkRoute('page',2).'">page 2</a><br>';
 
-  echo '<a href="'.Burp::linkRoute('orderby',array('','title')).'">sort by title up</a><br>';
-  echo '<a href="'.Burp::linkRoute('orderby',array('-','label')).'">sort by label down</a><br>';
+  echo '<a href="'.Burp::linkRoute('orderby',array('','title')).'">sort title up</a><br>';
+  echo '<a href="'.Burp::linkRoute('orderby',array('-','label')).'">sort label down</a><br>';
 
   echo '<hr>';
 }));
