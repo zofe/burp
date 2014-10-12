@@ -26,15 +26,15 @@ install via composer adding ```"zofe/burp": "dev-master"```
 ...
 
 Burp::get('^user/(\d+)$', null, array('as'=>'user.show', function($id) {
-    echo "show user $id";
+    //show user $id
 }));
 
 Burp::post('^user$', null, array('as'=>'user.create', function() {
-    echo "create new user";
+    //create new user
 }));
 
 Burp::patch('^user/(\d+)$', null, array('as'=>'user.update', function($id) {
-    echo "save changes for user $id";
+    //save changes for user $id
 }));
 
 Burp::get(null, 'apykey=(\w+)', array('as'=>'key', function($key) {
