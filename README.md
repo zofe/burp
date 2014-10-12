@@ -37,6 +37,10 @@ Burp::patch('^user/(\d+)$', null, array('as'=>'user.update', function($id) {
     echo "save changes for user $id";
 }));
 
+Burp::get(null, 'apykey=(\w+)', array('as'=>'key', function($key) {
+    //check api key in query string..
+}));
+
 Burp::dispatch();
 ```
 
