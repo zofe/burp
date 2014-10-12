@@ -41,12 +41,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Zofe\Burp\Burp;
 
 
-//widget routing - fired when url is for example:  /pg/2
+//widget routing - fired when url is for example:  /something/pg/2
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
     echo "current page is page: $page<br>";
 }));
 
-//widget routing - fired when url is for example: /?ord=-title
+//widget routing - fired when url is for example: /something?ord=-title
 Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $field) {
     $direction = ($direction == '-') ? "descending" : "ascending";
     echo "current sorting is on : $field ($direction)<br>";
@@ -54,7 +54,7 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 
 
 
-//home route  - fired when uri is "/"  or "/pg/12" ...
+//home route  - fired when uri is "/"  or "/pg/2", but not when is "/something/pag/2" ...
 Burp::get('^/{page?}$', null, array('as'=>'home', function() {
 
   echo '<hr>';
