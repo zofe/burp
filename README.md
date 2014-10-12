@@ -24,19 +24,22 @@ install via composer adding ```"zofe/burp": "dev-master"```
 <?php
 
 ...
-
-Burp::get('^user/(\d+)$', null, array('as'=>'user.show', function($id) {
+//catch /user/2 (GET)
+Burp::get('^/user/(\d+)$', null, array('as'=>'user.show', function($id) {
     //show user $id
 }));
 
-Burp::post('^user$', null, array('as'=>'user.create', function() {
+//catch /user (POST)
+Burp::post('^/user$', null, array('as'=>'user.create', function() {
     //create new user
 }));
 
-Burp::patch('^user/(\d+)$', null, array('as'=>'user.update', function($id) {
+//catch /user/2 (PATCH)
+Burp::patch('^/user/(\d+)$', null, array('as'=>'user.update', function($id) {
     //save changes for user $id
 }));
 
+//catch /something?apikey=xxxx
 Burp::get(null, 'apikey=(\w+)', array('as'=>'key', function($key) {
     //check api key in query string..
 }));
@@ -98,7 +101,7 @@ Burp::get('^/{page?}$', null, array('as'=>'home', function() {
 }));
 
 //404 route  - fired only if there are defined strict routes (i.e.: ^/$ or ^.*$)  
-//but all uncached
+//but all uncatched
 Burp::missing(function() {
     header("HTTP/1.0 404 Not Found");
     echo '404 - Resource Not Found';
