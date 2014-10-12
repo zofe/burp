@@ -57,14 +57,14 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 //home route  - fired when uri is "/"  or "/pg/12" ...
 Burp::get('^/{page?}$', null, array('as'=>'home', function() {
 
-    echo '<hr>';
-    echo '<a href="'.Burp::linkRoute('page',1).'">page 1</a><br>';
-    echo '<a href="'.Burp::linkRoute('page',2).'">page 2</a><br>';
+  echo '<hr>';
+  echo '<a href="'.Burp::linkRoute('page',1).'">page 1</a><br>';
+  echo '<a href="'.Burp::linkRoute('page',2).'">page 2</a><br>';
 
-    echo '<a href="'.Burp::linkRoute('orderby',array('','title')).'">order by title asc</a><br>';
-    echo '<a href="'.Burp::linkRoute('orderby',array('-','label')).'">order by label desc</a><br>';
+  echo '<a href="'.Burp::linkRoute('orderby',array('','title')).'">sort by title up</a><br>';
+  echo '<a href="'.Burp::linkRoute('orderby',array('-','label')).'">sort by label down</a><br>';
 
-    echo '<hr>';
+  echo '<hr>';
 }));
 
 //404 route  - fired only if there are defined strict routes (^..$)  
