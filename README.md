@@ -34,6 +34,7 @@ and this php file
 ```php
 
 <?php
+#index.php
 
 require_once __DIR__ . '/vendor/autoload.php';
 
