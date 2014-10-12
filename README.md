@@ -41,6 +41,9 @@ Burp::get(null, 'apykey=(\w+)', array('as'=>'key', function($key) {
     //check api key in query string..
 }));
 
+//will return: /currenturi?apykey=asda
+Burp::linkRoute('key','asda')
+
 Burp::dispatch();
 ```
 
