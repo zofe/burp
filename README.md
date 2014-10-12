@@ -2,7 +2,7 @@ Burp
 ============
 
 Simple php __Router__ (or filter?) that can work with "URI", "QUERY STRING", or both.  
-It also has a simple __Event__ Listener implementation (to fire or queue application evens).
+It also has a simple __Event__ Listener implementation (to fire or queue application events).
 
 You can use Burp in your preferred framework (Including laravel), It does not pretend to be the only router, It just check your urls then fire or queue your events.
 
@@ -17,8 +17,20 @@ To make widgets that works driven by  uri-segments or query-string, without the 
 install via composer adding ```"zofe/burp": "dev-master"```
 
 
+use Zofe\Burp\Burp;
 
-## usage
+```php
+
+<?php
+//widget routing - fired when url is for example:  /something/pg/2
+Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
+    echo "current page is page: $page<br>";
+}));
+
+```
+
+
+## usage - full example as front-controller
 
 
 
