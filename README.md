@@ -37,11 +37,11 @@ Burp::patch('^user/(\d+)$', null, array('as'=>'user.update', function($id) {
     //save changes for user $id
 }));
 
-Burp::get(null, 'apykey=(\w+)', array('as'=>'key', function($key) {
+Burp::get(null, 'apikey=(\w+)', array('as'=>'key', function($key) {
     //check api key in query string..
 }));
 
-//will return: /currenturi?apykey=asda
+//will return: /currenturi?apikey=asda
 Burp::linkRoute('key','asda')
 
 Burp::dispatch();
