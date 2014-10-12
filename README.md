@@ -54,7 +54,7 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 
 
 
-//home route  - fired when uri is "/"  or "/pg/2", but not when is "/something/pag/2" ...
+//strict route  - fired when uri is "/"  or "/pg/2", but not when is "/something/pag/2" ...
 Burp::get('^/{page?}$', null, array('as'=>'home', function() {
 
   echo '<hr>';
