@@ -112,3 +112,63 @@ Burp::missing(function() {
 Burp::dispatch();
 ```
 
+
+## usage - in laravel 
+
+untested but should work:
+
+```php
+
+<?php
+
+#in your laravel routes.php (or filters.php) add
+
+Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
+     \Event::queue('page', array($page));
+}));
+
+Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $field) {
+    \Event::queue('sort', array($direction, $field));
+}))->remove('page');
+
+
+#in your controller 
+
+public function __construct()
+{
+    $this->articles = Article::newQuery();
+    \Event::listen('sort', array($this, 'sort'));
+    \Event::listen('page', array($this, 'page'));
+}
+..
+
+protected function sort($direction, $field)
+{
+    $direction = ($direction == '-') ? "DESC" : "ASC";
+    $this->articles = $this->articles->orderBy($field, $direction);
+}
+protected function page($page)
+{
+    \Paginator::setCurrentPage($page);
+}
+
+public function getList()
+{
+    //starting from a clean query builder
+    $this->articles = Article::newQuery();
+    
+    //check for sorting and page 
+    \Event::flush('sort');
+    \Event::flush('page');
+    
+    //paginate
+    $articles = $this->articles->paginate(20);
+    
+    //fix links to use custom pagination segments (instead classic 'page=?')
+    $links = $articles->links();
+    $links = preg_replace('@href="(.*\?page=(\d+))"@U', 'href="'.Burp::linkRoute('page', '$2').'"', $links);
+
+    return View::make('articles.list', compact('articles','links'));
+}
+ 
+```
