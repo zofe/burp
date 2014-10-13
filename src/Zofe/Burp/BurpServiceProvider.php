@@ -24,6 +24,7 @@ class BurpServiceProvider extends ServiceProvider
     {
         $this->package('zofe/burp', 'burp');
         AliasLoader::getInstance()->alias('Burp',  'Zofe\Burp\Burp');
+        Burp::dispatch();
     }
 
 }
