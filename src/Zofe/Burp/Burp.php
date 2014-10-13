@@ -126,7 +126,7 @@ class Burp
                 BurpEvent::fire('missing');
 
             }
-            
+
         }
 
         BurpEvent::flushAll();

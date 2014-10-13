@@ -12,7 +12,7 @@ class BurpEvent
 {
     public static $events = array();
     public static $queue = array();
-    
+
     public static function listen($event, \Closure $func)
     {
         self::$events[$event][] = $func;
@@ -25,10 +25,8 @@ class BurpEvent
 
     public static function flush($event)
     {
-        if(isset(self::$queue[$event]) AND isset(self::$events[$event]))
-        {
-            foreach(self::$queue[$event] as $ev=>$args)
-            {
+        if (isset(self::$queue[$event]) and isset(self::$events[$event])) {
+            foreach (self::$queue[$event] as $ev=>$args) {
                 $func = array_shift(self::$events[$event]);
                 call_user_func_array($func, $args);
             }
@@ -38,18 +36,15 @@ class BurpEvent
 
     public static function flushAll()
     {
-        foreach(self::$queue as $event => $events)
-        {
+        foreach (self::$queue as $event => $events) {
             self::flush($event);
         }
     }
-    
+
     public static function fire($event, $args = array())
     {
-        if(isset(self::$events[$event]))
-        {
-            foreach(self::$events[$event] as $func)
-            {
+        if (isset(self::$events[$event])) {
+            foreach (self::$events[$event] as $func) {
                 call_user_func_array($func, $args);
             }
         }
