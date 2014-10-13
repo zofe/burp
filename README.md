@@ -174,7 +174,7 @@ public function getList()
  
 ```
 This snippet should give you the idea that you can use Burp to define some behavior "across laravel routes".  
-For example if there is a query string like this: `?ord=-title` then fire  "sort"  event.
+For example if there is a query string like this: `?ord=-title` then fire  "sort"  event.  
 More, As you know laravel pagination work natively "only" with something like this: `?page=1`, but in this sample, for this controller, It will work
 via segment `/pg/1` (without to create a custom pagination class).
 
