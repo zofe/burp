@@ -123,6 +123,7 @@ untested but should work:
 
 #in your laravel routes.php (or filters.php) add
 
+//define some events
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
      \Event::queue('page', array($page));
 }));
@@ -136,7 +137,10 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 
 public function __construct()
 {
+    //starting from a clean query builder
     $this->articles = Article::newQuery();
+    
+    //listen for burp defined events
     \Event::listen('sort', array($this, 'sort'));
     \Event::listen('page', array($this, 'page'));
 }
@@ -154,9 +158,6 @@ protected function page($page)
 
 public function getList()
 {
-    //starting from a clean query builder
-    $this->articles = Article::newQuery();
-    
     //check for sorting and page 
     \Event::flush('sort');
     \Event::flush('page');
