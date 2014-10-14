@@ -206,14 +206,48 @@ class Burp
      * @param $param  one or more params required by the route
      * @return string
      */
-    public static function linkRoute($name, $params, $url = null)
+    public static function linkRoute($name, $params = array(), $url = null)
     {
+        //starting defining url and qs
         $url = ($url != '') ? $url : $_SERVER["REQUEST_URI"];
         $url_arr = explode('?', $url);
         $url = $url_arr[0];
         $qs = (isset($url_arr[1])) ? $url_arr[1] : '';
-
         if (!is_array($params)) $params = (array) $params;
+
+        
+        //if a stric-uri?
+        if (isset(self::$routes[$name][0]) and self::$routes[$name][0]=== '^') {
+
+            $route = self::$routes[$name];
+            //in this case remove conditional patterns
+            $replaces = self::parsePattern($route);
+            foreach ($replaces as $pattern) {
+                $conditional = (substr($pattern, -1, 1) === '?') ? true : false;
+                $pattern = rtrim($pattern, '?');
+
+                if (array_key_exists($pattern, self::$routes)) {
+
+                    if ($conditional) {
+                        $route = preg_replace('#\{'.$pattern.'\?\}#', '', $route);
+                    } else {
+                        $route = preg_replace('#\{'.$pattern.'\}#', self::$routes[$pattern], $route);
+                    }
+                }
+
+            }
+            $route = ltrim($route, '^');
+            $route = rtrim($route, '$');
+            if (preg_match_all('#\(.*\)#U',$route, $matches)) {
+                foreach ($params as $key=>$param) {
+                    $route = str_replace($matches[0][$key],$param, $route);
+                }
+            }
+            return  $route;
+        }
+
+
+
         //If required we remove other routes (from segments or qs)
         if (count(self::$remove[$name])) {
             foreach (self::$remove[$name] as $route) {
