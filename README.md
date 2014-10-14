@@ -124,7 +124,7 @@ untested but should work:
 #in your laravel routes.php add
 
 ..
-Route::get('/article/list', array('as' => 'articles', 'uses' => 'ArticleController@getList'));
+Route::get('/articles/list', array('as'=>'articles','uses'=>'ArticleController@getList'));
 
 
 //define some general purpose events on uri-segments or query-string
@@ -178,13 +178,14 @@ public function getList()
 
     return View::make('articles.list', compact('articles','links'));
 }
- 
+
+}
 ```
 This snippet should give you the idea that you can use Burp to:  
 "define some behavior across laravel routes".  
 
-This url: `/articles/list?ord=-title` will fire "sort"  event.  
-This url: `/articles/list/pg/2?ord=title`  will fire "sort" and "page" events.
+This url: `/article/list?ord=-title` will fire "sort"  event.  
+This url: `/article/list/pg/2?ord=title`  will fire "sort" and "page" events.
 
 More, as you know laravel pagination work natively "only" with something like this:  
 `/articles/list?page=1`,  but in this sample for this controller It will work via segment:  
