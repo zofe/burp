@@ -160,7 +160,7 @@ class ArticleController extends BaseController {
 public function __construct()
 {
     //starting from a clean query builder
-    $this->articles = Article::newQuery();
+    $this->articles = new Article;
     
     //listen for burp defined events
     \Event::listen('sort', array($this, 'sort'));
