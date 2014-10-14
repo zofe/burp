@@ -148,6 +148,7 @@ Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
 }));
 
 Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $field) {
+    $direction = ($direction == '-') ? "DESC" : "ASC";
     \Event::queue('sort', array($direction, $field));
 }))->remove('page');
 
@@ -171,12 +172,11 @@ public function __construct()
     \Event::flush('page');
 }
 
-protected function sort($direction, $field)
+public function sort($direction, $field)
 {
-    $direction = ($direction == '-') ? "DESC" : "ASC";
     $this->articles = $this->articles->orderBy($field, $direction);
 }
-protected function page($page)
+public function page($page)
 {
     \Paginator::setCurrentPage($page);
 }
