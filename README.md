@@ -124,7 +124,7 @@ untested but should work:
 #in your laravel routes.php add
 
 ..
-Route::get('/article/list', array('as' => 'article.list', 'uses' => 'ArticleController@getList'));
+Route::get('/article/list', array('as' => 'articles', 'uses' => 'ArticleController@getList'));
 
 
 //define some general purpose events on uri-segments or query-string
