@@ -34,8 +34,6 @@ class BurpServiceProvider extends ServiceProvider
 
         });
 
-        Burp::dispatch();
-
     }
 
 }
