@@ -16,7 +16,11 @@ To make widgets that works driven by  uri-segments or query-string, without the 
 
 install via composer adding ```"zofe/burp": "dev-master"```
 
-
+if you're using laravel add the service provider in config/app.php:
+    'providers' => array(
+        ...
+        'Zofe\Burp\BurpServiceProvider',
+    )
 ## usage
 
 ```php

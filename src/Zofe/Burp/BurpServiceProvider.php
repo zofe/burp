@@ -30,7 +30,7 @@ class BurpServiceProvider extends ServiceProvider
 
         $this->app->booting(function () {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('Burp', 'Zofe\Burp\Facades\Burp');
+            $loader->alias('Burp', 'Zofe\Burp\Burp');
 
         });
 
