@@ -121,9 +121,13 @@ untested but should work:
 
 <?php
 
-#in your laravel routes.php (or filters.php) add
+#in your laravel routes.php add
 
-//define some events
+..
+Route::get('/article/list', array('as' => 'article.list', 'uses' => 'ArticleController@getList'));
+
+
+//define some general purpose events on uri-segments or query-string
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
      \Event::queue('page', array($page));
 }));
@@ -133,7 +137,10 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
 }))->remove('page');
 
 
+
+
 #in your controller 
+class ArticleController extends BaseController {
 
 public function __construct()
 {
@@ -143,8 +150,11 @@ public function __construct()
     //listen for burp defined events
     \Event::listen('sort', array($this, 'sort'));
     \Event::listen('page', array($this, 'page'));
+    
+    //flush queued events
+    \Event::flush('sort');
+    \Event::flush('page');
 }
-..
 
 protected function sort($direction, $field)
 {
@@ -158,14 +168,10 @@ protected function page($page)
 
 public function getList()
 {
-    //check for sorting and page 
-    \Event::flush('sort');
-    \Event::flush('page');
-    
     //paginate
     $articles = $this->articles->paginate(20);
     
-    //fix links to use custom pagination segments (instead classic 'page=?')
+    //fix links to use custom defined pagination-uri (instead classic 'page=?')
     $links = $articles->links();
     $links = preg_replace('@href="(.*\?page=(\d+))"@U', 
                           'href="'.Burp::linkRoute('page', '$2').'"', $links);
@@ -174,12 +180,15 @@ public function getList()
 }
  
 ```
-This snippet should give you the idea that you can use Burp to define some behavior "across laravel routes".  
-This url: `/articles/list?ord=-title` will fire "sort"  event.  
-This url: `/articles/list/pg/2?ord=title`  will fire "sort" and  "page"  
+This snippet should give you the idea that you can use Burp to:  
+"define some behavior across laravel routes".  
 
-More, as you know laravel pagination work natively "only" with something like this: `/articles/list?page=1`, but in this sample for this controller It will work
-via segment: `/articles/list/pg/x` (without to create a custom pagination class).
+This url: `/articles/list?ord=-title` will fire "sort"  event.  
+This url: `/articles/list/pg/2?ord=title`  will fire "sort" and "page" events.
+
+More, as you know laravel pagination work natively "only" with something like this:  
+`/articles/list?page=1`,  but in this sample for this controller It will work via segment:  
+`/articles/list/pg/x` (without to create a custom pagination class).
 
 
 
