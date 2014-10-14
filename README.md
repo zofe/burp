@@ -151,7 +151,7 @@ Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $fi
     \Event::queue('sort', array($direction, $field));
 }))->remove('page');
 
-
+Burp::dispatch();
 
 
 #in your controller 

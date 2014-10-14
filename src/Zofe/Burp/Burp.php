@@ -170,7 +170,7 @@ class Burp
     private static function checkParams($method, $params)
     {
 
-        if (! in_array($method, array('get','post','patch','put','delete')))
+        if (! in_array(strtolower($method), array('get','post','patch','put','delete')))
             throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete'");
 
         if (count($params)<3 ||
