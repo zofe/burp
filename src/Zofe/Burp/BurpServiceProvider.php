@@ -23,8 +23,19 @@ class BurpServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->package('zofe/burp', 'burp');
-        AliasLoader::getInstance()->alias('Burp',  'Zofe\Burp\Burp');
+    }
+
+    public function register()
+    {
+
+        $this->app->booting(function () {
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias('Burp', 'Zofe\Burp\Facades\Burp');
+
+        });
+
         Burp::dispatch();
+
     }
 
 }
