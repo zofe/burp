@@ -34,7 +34,7 @@ There are two main differences you need to know:
   
 ```
 
-Burp::$http_method($uri_regex, $querystring_regex, array('as'=>$route_name, function($param) {
+Burp::$http_method($uri_regex, $querystr_regex, array('as'=>$route_name, function($param) {
     
 	//do something
 }));
