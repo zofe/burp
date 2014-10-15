@@ -30,7 +30,7 @@ There are two main differences you need to know:
 
   - a route rule can be __strict__ or __not strict__ (It means: "exact match", or "partial match" i.e. a non strict rule can match some uri-serment or some query-string parameter)
 
-  - rules are non-blocking, It means that a single http request can trigger more than a route 
+  - rules are non-blocking, It means that a single http request can trigger more than one route 
   
 ```
 
