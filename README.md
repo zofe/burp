@@ -160,12 +160,11 @@ More, as you know laravel pagination work natively "only" with something like th
 Route::pattern('pg', 'pg/(\d+)');
 Route::get('/articles/list/{pg?}', array('as'=>'art','uses'=>'ArticleController@getList'));
 
-
-//define some general purpose events on uri-segments or query-string
+//define some general purpose events on uri-segments
 Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
      \Event::queue('page', array($page));
 }));
-
+//define some general purpose events on query-string
 Burp::get(null, 'ord=(-?)(\w+)', array('as'=>'orderby', function($direction, $field) {
     $direction = ($direction == '-') ? "DESC" : "ASC";
     \Event::queue('sort', array($direction, $field));
