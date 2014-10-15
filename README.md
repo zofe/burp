@@ -25,11 +25,30 @@ if you're using laravel add the service provider in config/app.php:
     
 ## usage
 
+Burp is similar to any other PHP router, but it can also behave as a filter.  
+There are two main differences you need to know:
+
+  - a route rule can be __strict__ or __not strict__ (It means: "exact match", or "partial match" i.e. a non strict rule can match some uri-serment or some query-string parameter)
+
+  - rules are non-blocking, It means that a single http request can trigger more than a route 
+  
+```
+
+Burp::$http_method($uri_regex, $querystring_regex, array('as'=>$route_name, function($param,$param2,...) {
+    
+	//do something
+}));
+
+Burp::dispatch();
+```
+
+samples
+
 ```php
 
 <?php
 
-...
+
 //catch /user/2 (GET)
 Burp::get('^/user/(\d+)$', null, array('as'=>'user.show', function($id) {
     //show user $id
