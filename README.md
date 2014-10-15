@@ -1,7 +1,7 @@
 Burp
 ============
 
-Simple php __Router__ (or filter?) that can work with "URI", "QUERY STRING", or both.  
+Simple php __Router__ that can work with "URI", "QUERY STRING", or both.  
 It also has a simple __Event__ Listener implementation (to fire or queue application events).
 
 You can use Burp in your preferred framework (Including laravel), It does not pretend to be the only router, It just check your urls then fire or queue your events.
@@ -34,7 +34,7 @@ There are two main differences you need to know:
   
 ```
 
-Burp::$http_method($uri_regex, $querystring_regex, array('as'=>$route_name, function($param,$param2,...) {
+Burp::$http_method($uri_regex, $querystring_regex, array('as'=>$route_name, function($param) {
     
 	//do something
 }));
