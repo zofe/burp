@@ -215,5 +215,6 @@ public function getList()
 }
 ```
 
-
+Now you are also free to change your url-semantic in your router, for example switching from query-string to uri-segments or viceversa.  
+You can also move events and common behavior in a base controller  and then extend this one
 
