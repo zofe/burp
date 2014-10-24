@@ -64,6 +64,11 @@ Burp::patch('^/user/(\d+)$', null, array('as'=>'user.update', function($id) {
     //save changes for user $id
 }));
 
+//catch /welcome (on any http method: GET, POST, ...)
+Burp::any('^/welcome$', null, function($id) {
+    //say welcome!
+}));
+
 //catch /something?apikey=xxxx
 Burp::get(null, 'apikey=(\w+)', array('as'=>'key', function($key) {
     //check api key in query string..
