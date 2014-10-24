@@ -135,7 +135,7 @@ class Burp
         BurpEvent::flushAll();
     }
 
-    public static function isRoute($name, $params)
+    public static function isRoute($name, $params = array())
     {
         $uri = strtok($_SERVER["REQUEST_URI"],'?');
         $qs = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
@@ -143,7 +143,7 @@ class Burp
         $route = @self::$routes[$name];
 
         $matched = array();
-        if ($route=='' || preg_match('#' . $route . '#', $uri, $matched) && self::$methods[$name] == $method) {
+        if ($route=='' || preg_match('#' . $route . '#', $uri, $matched) && (self::$methods[$name] == 'ANY' || self::$methods[$name] == $method)) {
 
             array_shift($matched);
 
@@ -152,12 +152,20 @@ class Burp
                 array_shift($qsmatched);
 
                 $matched = array_merge($matched, $qsmatched);
-                if ($matched == $params)
+                
+                if (count($params)) {
+                   return  ($matched == $params) ? true : false;
+                } else {
                     return true;
-
+                }
+                
             } elseif (self::$qs[$name] == '') {
-                if ($matched == $params)
+                
+                if (count($params)) {
+                    return  ($matched == $params) ? true : false;
+                } else {
                     return true;
+                }
 
             }
         }
