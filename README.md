@@ -175,6 +175,7 @@ route_get('explode=(\w+)', array('as'=>'bum',function ($name) {
 //will return: /currenturi?explode=john
 echo link_route('bum','john');
 
+
 route_dispatch();
 
 ```
