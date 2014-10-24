@@ -142,6 +142,22 @@ Burp::missing(function() {
 Burp::dispatch();
 ```
 
+## patterns
+
+You can also declare and use pattern 
+
+```php
+
+Burp::pattern('number', '\d+');
+Burp::pattern('page', 'pg/\d+');
+Burp::pattern('slug', '[a-z0-9-]+');
+
+Burp::get('articles/{page?}',...
+Burp::get('article/{slug}',...
+
+```
+
+
 ## helpers
 
 you can also use functions instead of static calls.
