@@ -154,7 +154,7 @@ route_any('^/test', function () {
     echo 'This is a test';
 });
 
-route_qyery('ord=(-?)(\w+)', function ($direction, $field) {
+route_query('ord=(-?)(\w+)', function ($direction, $field) {
     echo 'This is a test';
 });
 route_missing(function () {
