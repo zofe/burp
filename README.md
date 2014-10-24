@@ -168,10 +168,11 @@ route_missing(function () {
 
 //you can still use named route and link to route
 
-route_get('expl=(\w+)', array('as'=>'bum',function ($name) {
+route_get('explode=(\w+)', array('as'=>'bum',function ($name) {
     die('BUM: '.$name);
 });
 
+//will return: /currenturi?explode=john
 echo link_route('bum','john');
 
 route_dispatch();
