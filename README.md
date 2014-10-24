@@ -65,8 +65,8 @@ Burp::patch('^/user/(\d+)$', null, array('as'=>'user.update', function($id) {
 }));
 
 //catch /welcome (on any http method: GET, POST, ...)
-Burp::any('^/welcome$', null, function($id) {
-    //say welcome!
+Burp::any('^/welcome/(\w+)$', null, function($username) {
+    //say welcome $username!
 }));
 
 //catch /something?apikey=xxxx
