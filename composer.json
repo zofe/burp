@@ -15,7 +15,8 @@
         "illuminate/support": "~4.1"
     },
     "autoload": {
-        "psr-0": {"Zofe\\Burp": "src/"}
+        "psr-0": {"Zofe\\Burp": "src/"},
+        "files": ["src/Zofe/Burp/helpers.php"]
     },
     "minimum-stability": "stable"
 }

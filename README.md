@@ -137,6 +137,42 @@ Burp::missing(function() {
 Burp::dispatch();
 ```
 
+## helpers
+
+you can also use functions instead of static calls.
+- route_* works checking 'uri'
+- route_query  works only checking 'query string' (on any http method)
+
+
+```php
+
+route_get('^/', function () {
+    echo 'Welcome!';
+});
+
+route_any('^/test', function () {
+    echo 'This is a test';
+});
+
+route_qyery('ord=(-?)(\w+)', function ($direction, $field) {
+    echo 'This is a test';
+});
+route_missing(function () {
+    echo 'Page not found';
+});
+
+//you can still use named route and link to route
+
+route_get('expl=(\w+)', array('as'=>'bum',function ($name) {
+    die('BUM: '.$name);
+});
+
+echo link_route('bum','john');
+
+route_dispatch();
+
+```
+
 
 ## usage - in laravel 
 

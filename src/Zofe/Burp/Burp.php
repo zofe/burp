@@ -45,7 +45,7 @@ class Burp
      */
     public static function __callstatic($method, $params)
     {
-        self::checkParams($method, $params);
+        $params = self::fixParams($method, $params);
 
         $uri = ltrim($params[0],"/");
         $qs = $params[1];
@@ -58,7 +58,7 @@ class Burp
         self::$callbacks[$name] = $params[2][0];
 
         //this is a strict rule
-        if ($method == 'get' and $uri!= '' and $uri[0]=== '^') {
+        if ($uri!= '' and $uri[0]=== '^') {
             self::$tocatch[] = $name;
         }
 
@@ -73,7 +73,10 @@ class Burp
         $uri = strtok($_SERVER["REQUEST_URI"],'?');
         $qs = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
         $method = $_SERVER['REQUEST_METHOD'];
+        
+        
         foreach (self::$routes as $name=>$route) {
+
 
             $replaces = self::parsePattern($route);
             foreach ($replaces as $pattern) {
@@ -93,8 +96,8 @@ class Burp
             }
 
             $matched = array();
-            if ($route=='' || preg_match('#' . $route . '#', $uri, $matched) && self::$methods[$name] == $method) {
-
+            if ($route=='' || preg_match('#' . $route . '#', $uri, $matched) && (self::$methods[$name] == 'ANY' || self::$methods[$name] == $method)) {
+                
                 array_shift($matched);
 
                 if (self::$qs[$name]!='' && preg_match('#' . self::$qs[$name] . '#', $qs, $qsmatched)) {
@@ -163,16 +166,20 @@ class Burp
     }
 
     /**
-     * check if route method call is correct
+     * check if route method call is correct, and try to fix if not
      * @param $method
      * @param $params
      */
-    private static function checkParams($method, $params)
+    private static function fixParams($method, $params)
     {
+        if (! in_array(strtolower($method), array('get','post','patch','put','delete','any','head')))
+            throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete','any','head'");
 
-        if (! in_array(strtolower($method), array('get','post','patch','put','delete')))
-            throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete'");
-
+        //force route_name to be the uri
+        if  (is_array($params) && isset($params[2]) && ($params[2] instanceof \Closure)) {
+            $params[2] = array('as'=>$params[0], $params[2]);
+        }
+        
         if (count($params)<3 ||
             !is_array($params[2]) ||
             !array_key_exists('as', $params[2]) ||
@@ -181,6 +188,7 @@ class Burp
             throw new \InvalidArgumentException('third parameter should be an array containing a
                                                    valid callback: array(\'as\'=>\'routename\', function () { })  ');
 
+        return $params;
     }
 
     /**
