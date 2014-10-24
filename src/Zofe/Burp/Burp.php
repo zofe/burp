@@ -17,15 +17,15 @@ namespace Zofe\Burp;
  */
 class Burp
 {
-    public static $routes = array();
-    public static $qs = array();
-    public static $remove = array();
-    public static $methods = array();
-    public static $callbacks = array();
+    protected static $routes = array();
+    protected static $qs = array();
+    protected static $remove = array();
+    protected static $methods = array();
+    protected static $callbacks = array();
 
-    public static $tocatch = array();
-    public static $catched = array();
-    public static $missing_callback;
+    protected static $tocatch = array();
+    protected static $catched = array();
+    protected static $missing_callback;
 
     public static function missing(\Closure $missing)
     {
@@ -316,6 +316,12 @@ class Burp
         return $url.$qs;
     }
 
+    
+    public static function pattern($name, $pattern)
+    {
+        
+    }
+    
     private static function parsePattern($pattern)
     {
         if (preg_match_all('/\{(\w+\??)\}/is', $pattern, $matches)) {
