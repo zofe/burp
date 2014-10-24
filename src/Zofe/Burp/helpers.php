@@ -1,5 +1,11 @@
 <?php
 
+if ( ! function_exists('route_pattern')) {
+    function route_pattern($name, $regex) {
+        Zofe\Burp\Burp::pattern($name, $regex);
+    }
+}
+
 if ( ! function_exists('route_get')) {
     function route_get($uri, $parameters) {
         Zofe\Burp\Burp::get($uri, null, $parameters);
