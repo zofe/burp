@@ -78,3 +78,32 @@ if ( ! function_exists('link_route')) {
     }
 }
 
+if ( ! function_exists('event_queue')) {
+    function event_queue($name, $parameters = array()) {
+        Zofe\Burp\BurpEvent::queue($name, $parameters);
+    }
+}
+
+if ( ! function_exists('event_fire')) {
+    function event_fire($name, $parameters = array()) {
+        Zofe\Burp\BurpEvent::fire($name, $parameters);
+    }
+}
+
+if ( ! function_exists('event_listen')) {
+    function event_listen($name, $callable) {
+        Zofe\Burp\BurpEvent::listen($name, $callable);
+    }
+}
+
+if ( ! function_exists('event_flush')) {
+    function event_flush($name) {
+        Zofe\Burp\BurpEvent::flush($name);
+    }
+}
+
+if ( ! function_exists('event_flush_all')) {
+    function event_flush_all() {
+        Zofe\Burp\BurpEvent::flushAll();
+    }
+}
