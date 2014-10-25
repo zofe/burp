@@ -68,7 +68,7 @@ if ( ! function_exists('route_dispatch')) {
 
 if ( ! function_exists('is_route')) {
     function is_route($name, $parameters = array() ) {
-        return return Zofe\Burp\Burp::isRoute($name, $parameters);
+        return Zofe\Burp\Burp::isRoute($name, $parameters);
     }
 }
 
