@@ -53,8 +53,8 @@ class Burp
         $qs = $params[1];
 
         $name = $params[2]['as'];
-        self::$routes[$name] = $uri;
-        self::$qs[$name] = $qs;
+        self::$routes[$name] = self::parsePattern($uri, false, true);
+        self::$qs[$name] = self::parsePattern($qs, false, true);
         self::$remove[$name] = array();
         self::$methods[$name] = strtoupper($method);
         self::$callbacks[$name] = $params[2][0];
@@ -67,6 +67,8 @@ class Burp
             self::$tocatch[] = $name;
         }
 
+       // if ($name == 'home')
+       //     dd(self::$routes[$name], self::$qs[$name]);
         return new static();
     }
 
@@ -220,14 +222,17 @@ class Burp
         $url = $url_arr[0];
         $qs = (isset($url_arr[1])) ? $url_arr[1] : '';
         if (!is_array($params)) $params = (array) $params;
-
-        
+ 
         //if a stric-uri?
         if (isset(self::$routes[$name][0]) and self::$routes[$name][0]=== '^') {
 
             $route = self::$routes[$name];
             //in this case remove conditional patterns
             $route = self::parsePattern($route, true);
+
+            //we remove also conditional atoms
+            $route = preg_replace('#\(.*\)\?#', '', $route);
+            
             $route = ltrim($route, '^');
             $route = rtrim($route, '$');
             if (preg_match_all('#\(.*\)#U',$route, $matches)) {
@@ -306,7 +311,7 @@ class Burp
      * @param $pattern
      * @return string
      */
-    private static function parsePattern($pattern, $remove_conditional = false)
+    private static function parsePattern($pattern, $remove_conditional = false, $only_pattern = false)
     {
         $url = $pattern;
         if (!preg_match_all('/\{(\w+\??)\}/is', $pattern, $matches)) {
@@ -319,14 +324,17 @@ class Burp
             $pattern = rtrim($pattern, '?');
 
             if (array_key_exists($pattern, self::$patterns)) {
-                $replace = (count(self::$parameters[$pattern])) ? '('.self::$parameters[$pattern].')' : self::$parameters[$pattern];
+
+                $replace = self::$patterns[$pattern];
                 if ($conditional) {
                     $replace = ($remove_conditional) ? '' : $replace.'?';
                     $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
-                } else {
                     
+                } else {
                     $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
                 }
+                $pattern = $url;
+                if ($only_pattern) return $pattern;
             }
 
             if (array_key_exists($pattern, self::$routes)) {

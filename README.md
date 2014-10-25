@@ -220,7 +220,8 @@ Route::pattern('pg', 'pg/(\d+)');
 Route::get('/articles/list/{pg?}', array('as'=>'art','uses'=>'ArticleController@getList'));
 
 //define some general purpose events on uri-segments
-Burp::get('pg/(\d+)', null, array('as'=>'page', function($page) {
+Burp::pattern('pg', 'pg/(\d+)');
+Burp::get('{pg}', null, array('as'=>'page', function($page) {
      \Event::queue('page', array($page));
 }));
 //define some general purpose events on query-string
