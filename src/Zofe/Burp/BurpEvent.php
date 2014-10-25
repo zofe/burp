@@ -13,7 +13,7 @@ class BurpEvent
     public static $events = array();
     public static $queue = array();
 
-    public static function listen($event, \Closure $func)
+    public static function listen($event, $func)
     {
         self::$events[$event][] = $func;
     }
