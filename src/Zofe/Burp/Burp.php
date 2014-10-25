@@ -139,7 +139,7 @@ class Burp
 
             array_shift($matched);
 
-            if (self::$qs[$name]!='' && preg_match('#' . self::$qs[$name] . '#', $qs, $qsmatched)) {
+            if (@self::$qs[$name]!='' && preg_match('#' . self::$qs[$name] . '#', $qs, $qsmatched)) {
 
                 array_shift($qsmatched);
 
@@ -151,7 +151,7 @@ class Burp
                     return true;
                 }
                 
-            } elseif (self::$qs[$name] == '') {
+            } elseif (@self::$qs[$name] == '') {
                 
                 if (count($params)) {
                     return  ($matched == $params) ? true : false;
