@@ -28,7 +28,14 @@ class BurpEvent
         if (isset(self::$queue[$event]) and isset(self::$events[$event])) {
             foreach (self::$queue[$event] as $ev=>$args) {
                 $func = array_shift(self::$events[$event]);
-                @call_user_func_array($func, $args);
+                if (is_array($func)) {
+                    $controller = new $func[0];
+                    $method = $func[1];
+                    call_user_func_array(array($controller, $method), $args);
+                } else {
+                    call_user_func_array($func, $args);                    
+                }
+
             }
             self::$queue[$event] = array();
         }
