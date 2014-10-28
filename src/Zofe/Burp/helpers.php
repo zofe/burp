@@ -107,3 +107,10 @@ if ( ! function_exists('event_flush_all')) {
         Zofe\Burp\BurpEvent::flushAll();
     }
 }
+
+if ( ! function_exists('request_uri')) {
+    function request_uri() {
+        return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    }
+}
+

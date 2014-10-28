@@ -42,7 +42,7 @@ Burp::$http_method($uri_regex, $querystr_regex, array('as'=>$route_name, functio
 Burp::dispatch();
 ```
 
-samples
+## samples
 
 ```php
 
@@ -78,6 +78,20 @@ Burp::get(null, 'apikey=(\w+)', array('as'=>'key', function($key) {
 Burp::linkRoute('key','asda')
 
 Burp::dispatch();
+```
+
+
+## bind controllers
+
+you can bind a route to some __class@method__ using 'uses' key:
+
+```php
+
+<?php
+
+//catch /user/2 (GET)  and bind it to UserController class on show method  
+Burp::get('^/user/(\d+)$', null, array('as'=>'user.show', 'uses'=>'UsersController@show'));
+
 ```
 
 

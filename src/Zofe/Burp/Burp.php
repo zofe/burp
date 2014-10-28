@@ -57,10 +57,16 @@ class Burp
         self::$qs[$name] = self::parsePattern($qs, false, true);
         self::$remove[$name] = array();
         self::$methods[$name] = strtoupper($method);
-        self::$callbacks[$name] = $params[2][0];
-
-        $reflection = new \ReflectionFunction($params[2][0]);
-        self::$parameters[$name] =  $reflection->getParameters();
+        self::$callbacks[$name] = $params[2]['uses'];
+        
+        if (is_array($params[2]['uses'])) {
+            $reflection = new \ReflectionMethod($params[2]['uses'][0], $params[2]['uses'][1]);
+            self::$parameters[$name] =  $reflection->getParameters();
+        } else {
+            $reflection = new \ReflectionFunction($params[2]['uses']);
+            self::$parameters[$name] =  $reflection->getParameters();
+        }
+       
         
         //this is a strict rule
         if ($uri!= '' and $uri[0]=== '^') {
@@ -71,7 +77,7 @@ class Burp
        //     dd(self::$routes[$name], self::$qs[$name]);
         return new static();
     }
-
+    
     /**
      * dispatch the router: check for all defined routes and call closures
      */
@@ -175,19 +181,39 @@ class Burp
         if (! in_array(strtolower($method), array('get','post','patch','put','delete','any','head')))
             throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete','any','head'");
 
-        //force route_name to be the uri
+
+        //fix closures / controllers 
+        if  (is_array($params) && isset($params[2]) && is_array($params[2])) {
+
+            
+            //controller@method
+            if (isset($params[2]['uses']) && is_string($params[2]['uses']) && strpos($params[2]['uses'], '@'))
+            {
+               
+                $callback = explode('@', $params[2]['uses']);
+                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $callback);
+            }
+            
+            //closure fix
+            if (isset($params[2]['as']) && isset($params[2][0]) && ($params[2][0] instanceof \Closure))
+            {
+                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $params[2][0]);
+            }
+        }
+        
+        //no route name given, so route_name will be the first parameter
         if  (is_array($params) && isset($params[2]) && ($params[2] instanceof \Closure)) {
-            $params[2] = array('as'=>$params[0], $params[2]);
+            $params[2] = array('as'=>$params[0], 'uses'=>$params[2]);
         }
         
         if (count($params)<3 ||
             !is_array($params[2]) ||
             !array_key_exists('as', $params[2]) ||
-            !array_key_exists('0', $params[2]) ||
-            !($params[2][0] instanceof \Closure) )
+            !array_key_exists('uses', $params[2]) ||
+            !($params[2]['uses'] instanceof \Closure  || is_array($params[2]['uses'])) )
             throw new \InvalidArgumentException('third parameter should be an array containing a
-                                                   valid callback: array(\'as\'=>\'routename\', function () { })  ');
-
+                                                   valid callback : array(\'as\'=>\'routename\', function () { })  ');
+        
         return $params;
     }
 
