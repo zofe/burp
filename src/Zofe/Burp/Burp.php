@@ -364,7 +364,7 @@ class Burp
             }
 
             if (array_key_exists($pattern, self::$routes)) {
-                $replace = (count(self::$parameters[$pattern])) ? '('.self::$routes[$pattern].')' : self::$routes[$pattern];
+                $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.self::$routes[$pattern].')' : self::$routes[$pattern];
                 if ($conditional) {
                     $replace = ($remove_conditional) ? '' : $replace.'?';
                     $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
@@ -374,7 +374,7 @@ class Burp
             }
 
             if (array_key_exists($pattern, self::$qs)) {
-                $replace = (count(self::$parameters[$pattern])) ? '('.self::$qs[$pattern].')' : self::$qs[$pattern];
+                $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.self::$qs[$pattern].')' : self::$qs[$pattern];
                 if ($conditional) {
                     $replace = ($remove_conditional) ? '' : $replace.'?';
                     $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
