@@ -323,6 +323,26 @@ class Burp
         return $url.$qs;
     }
 
+    /**
+     * return a plain html link
+     * 
+     * @param $url
+     * @param null $title
+     * @param array $attributes
+     * @return string
+     */
+    public static function linkUrl($url, $title = null, $attributes = array())
+    {
+        $title = ($title) ? $title : $url;
+        $compiled = '';
+        if (count($attributes)) {
+            $compiled = '';
+            foreach ($attributes as $key => $val) {
+                $compiled .= ' ' . $key . '="' .  htmlspecialchars((string) $val, ENT_QUOTES, "UTF-8", true) . '"';
+            }
+        }
+        return '<a href="'.$url.'"'.$compiled.'>'.$title.'</a>';
+    }
     
     public static function pattern($name, $pattern)
     {

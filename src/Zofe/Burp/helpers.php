@@ -78,6 +78,12 @@ if ( ! function_exists('link_route')) {
     }
 }
 
+if ( ! function_exists('link_url')) {
+    function link_url($url, $title = null, $attributes = array()) {
+        return Zofe\Burp\Burp::linkUrl($url, $title, $attributes);
+    }
+}
+
 if ( ! function_exists('event_queue')) {
     function event_queue($name, $parameters = array()) {
         Zofe\Burp\BurpEvent::queue($name, $parameters);
