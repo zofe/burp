@@ -120,3 +120,20 @@ if ( ! function_exists('request_uri')) {
     }
 }
 
+if ( ! function_exists('request_method')) {
+    function request_method() {
+        return  $_SERVER['REQUEST_METHOD'];
+    }
+}
+
+if ( ! function_exists('request_method_is')) {
+    function request_method_is($method) {
+        return ($_SERVER['REQUEST_METHOD'] == strtoupper($method)) ? true : false;
+    }
+}
+
+if ( ! function_exists('request_input')) {
+    function request_input($var, $default = null) {
+        return (isset($_REQUEST[$var])) ? $_REQUEST[$var] : $default;
+    }
+}
