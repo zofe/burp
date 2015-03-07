@@ -245,61 +245,69 @@ class Burp
         $url = $url_arr[0];
         $qs = (isset($url_arr[1])) ? $url_arr[1] : '';
         if (!is_array($params)) $params = (array) $params;
- 
+        
         //if a stric-uri?
         if (isset(self::$routes[$name][0]) and self::$routes[$name][0]=== '^') {
-
+            $is_strict = true;
             $route = self::$routes[$name];
             //in this case remove conditional patterns
-            $route = self::parsePattern($route, true);
+            $url = self::parsePattern($route, true);
 
             //we remove also conditional atoms
-            $route = preg_replace('#\(.*\)\?#', '', $route);
+            $url = preg_replace('#\(.*\)\?#', '', $route);
+
+            $url = ltrim($url, '^');
+            $url = rtrim($url, '$');
+            if (preg_match_all('#\(.*\)#U',$url, $matches)) {
+                foreach ($params as $key=>$param) {
+                    $url = str_replace($matches[0][$key],$param, $url);
+                }
+            }
             
-            $route = ltrim($route, '^');
-            $route = rtrim($route, '$');
-            if (preg_match_all('#\(.*\)#U',$route, $matches)) {
-                foreach ($params as $key=>$param) {
-                    $route = str_replace($matches[0][$key],$param, $route);
+            if (self::$qs[$name]) {
+                $url = preg_replace('#(&?)'.self::$qs[$name].'#', '', $url);
+            }
+            //return $url;//die($route);
+        
+        //non strict route
+        } else {
+            $is_strict = false;
+            
+            //If required we remove other routes (from segments and qs)
+            if (count(self::$remove[$name])) {
+                foreach (self::$remove[$name] as $route) {
+                    if (self::$routes[$route]) {
+                        $url = preg_replace('#(\/?)'.self::$routes[$route].'#', '', $url);
+                    }
+                    if (self::$qs[$route]) {
+                        $url = preg_replace('#(&?)'.self::$qs[$route].'#', '', $url);
+                    }
+
                 }
             }
-            return  $route;
-        }
 
-
-
-        //If required we remove other routes (from segments or qs)
-        if (count(self::$remove[$name])) {
-            foreach (self::$remove[$name] as $route) {
-                if (self::$routes[$route]) {
-                    $url = preg_replace('#(\/?)'.self::$routes[$route].'#', '', $url);
+            //if this route works with uri
+            //I check for all params to build the append segment with given params,
+            //then I strip current rule and append new one.
+            if (self::$routes[$name]) {
+                $append =  self::$routes[$name];
+                if (preg_match_all('#\(.*\)#U',$append, $matches)) {
+                    foreach ($params as $key=>$param) {
+                        $append = str_replace($matches[0][$key],$param, $append);
+                    }
                 }
-                if (self::$qs[$route]) {
-                    $url = preg_replace('#(&?)'.self::$qs[$route].'#', '', $url);
-                }
+                $url = preg_replace('#(\/?)'.self::$routes[$name].'#', '', $url);
+                $url = $url."/".$append;
+                $url = str_replace('//','/',$url);
 
             }
+            
         }
 
-        //if this route works with uri
-        //I check for all params to build the append segment with given params,
-        //then I strip current rule and append new one.
-        if (self::$routes[$name]) {
-            $append =  self::$routes[$name];
-            if (preg_match_all('#\(.*\)#U',$append, $matches)) {
-                foreach ($params as $key=>$param) {
-                    $append = str_replace($matches[0][$key],$param, $append);
-                }
-            }
-            $url = preg_replace('#(\/?)'.self::$routes[$name].'#', '', $url);
-            $url = $url."/".$append;
-            $url = str_replace('//','/',$url);
-
-        }
-
+        
         //if this route works on query string
-        //I check for all params to buid the "append" string with given params,
-        //then I strip current rule and append the new one.
+        //I check for all params to buid and "append" or "replace" query string with given params.
+        $append = '';
         if (self::$qs[$name]) {
             $append =  self::$qs[$name];
             if (preg_match_all('#\(.*\)#U',$append, $matches)) {
@@ -314,7 +322,7 @@ class Burp
             $qs = ltrim($qs, '&');
 
         }
-
+        if ($is_strict == true) $qs = $append;
         if ($qs != '') $qs = '?'.$qs;
         if ($url == '') $url = '/';
         return $url.$qs;
