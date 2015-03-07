@@ -37,7 +37,7 @@ class Burp
     /**
      * little bit magic here, to catch all http methods to define a named route
      * <code>
-     *    Router::get(null, 'page=(\d+)', array('as'=>'page', function ($page) {
+     *    Burp::get(null, 'page=(\d+)', array('as'=>'page', function ($page) {
      *        //with this query string: ?page=n  this closure will be triggered
      *    }));
      * </code>
@@ -66,15 +66,12 @@ class Burp
             $reflection = new \ReflectionFunction($params[2]['uses']);
             self::$parameters[$name] =  $reflection->getParameters();
         }
-       
         
         //this is a strict rule
         if ($uri!= '' and $uri[0]=== '^') {
             self::$tocatch[] = $name;
         }
-
-       // if ($name == 'home')
-       //     dd(self::$routes[$name], self::$qs[$name]);
+        
         return new static();
     }
     
@@ -343,13 +340,44 @@ class Burp
         }
         return '<a href="'.$url.'"'.$compiled.'>'.$title.'</a>';
     }
-    
+
+    /**
+     * global regex pattern with a reusable name
+     * adds the ability do define:  Burp::pattern('page', 'pg/\d+');
+     * and reuse it na a route definition:  Burp::get('articles/{page?}',...
+     * 
+     * @param $name
+     * @param $pattern
+     */
     public static function pattern($name, $pattern)
     {
         self::$patterns[$name] = $pattern;
     }
 
-
+    /**
+     * replace a pattern in an array of rules
+     *
+     * @param $pattern
+     * @param $container
+     * @param $url
+     * @param $conditional
+     * @param $remove_conditional
+     * @return string
+     */
+    protected static function replacePattern($pattern, $container, $url, $conditional, $remove_conditional)
+    {
+        if (array_key_exists($pattern, $container)) {
+            $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.$container[$pattern].')' : $container[$pattern];
+            if ($conditional) {
+                $replace = ($remove_conditional) ? '' : $replace.'?';
+                $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
+            } else {
+                $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
+            }
+        }
+        return $url;
+    }
+    
     /**
      * replace patterns with regex i.e. {id} with (\d+)  
      * if patternd is a route-name or a defined pattern 
@@ -357,7 +385,7 @@ class Burp
      * @param $pattern
      * @return string
      */
-    private static function parsePattern($pattern, $remove_conditional = false, $only_pattern = false)
+    protected static function parsePattern($pattern, $remove_conditional = false, $only_pattern = false)
     {
         $url = $pattern;
         if (!preg_match_all('/\{(\w+\??)\}/is', $pattern, $matches)) {
@@ -383,25 +411,9 @@ class Burp
                 if ($only_pattern) return $pattern;
             }
 
-            if (array_key_exists($pattern, self::$routes)) {
-                $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.self::$routes[$pattern].')' : self::$routes[$pattern];
-                if ($conditional) {
-                    $replace = ($remove_conditional) ? '' : $replace.'?';
-                    $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
-                } else {
-                    $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
-                }
-            }
-
-            if (array_key_exists($pattern, self::$qs)) {
-                $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.self::$qs[$pattern].')' : self::$qs[$pattern];
-                if ($conditional) {
-                    $replace = ($remove_conditional) ? '' : $replace.'?';
-                    $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
-                } else {
-                    $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
-                }
-            }
+            $url = self::replacePattern($pattern, self::$routes, $url, $conditional, $remove_conditional);
+            $url = self::replacePattern($pattern, self::$qs, $url, $conditional, $remove_conditional);
+            
 
         }
         return $url;
