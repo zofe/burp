@@ -94,8 +94,9 @@ Burp::get('^/user/(\d+)$', null, array('as'=>'user.show', 'uses'=>'UsersControll
 ## usage - full example as front-controller
 
 
+if you need burp in a "stand-alone" minimal configuration, need a front controller.  
+You can start from this .htaccess (most of application framework already have something like this)
 
-if you need to make a front controller, you can start from this .htaccess
 
     RewriteEngine On
 
@@ -103,7 +104,8 @@ if you need to make a front controller, you can start from this .htaccess
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
     
-and this php file
+then you've to include burp, this is a way to have Burp as standalone router:
+
 ```php
 
 <?php
