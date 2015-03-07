@@ -80,7 +80,10 @@ Burp::linkRoute('key','asda')
 Burp::dispatch();
 ```
 
-
+Important: 
+  - to define a "strict rule" you must use regex delimiters  __^__ and __$__
+  - to define a "parameter" you must parenthesis as in regex atom 
+  
 ## bind controllers
 
 you can bind a route to some __class@method__ using 'uses' key:
@@ -162,15 +165,15 @@ You can also declare and use pattern
 
 ```php
 
-Burp::pattern('number', '\d+');
-Burp::pattern('page', 'pg/\d+');
-Burp::pattern('slug', '[a-z0-9-]+');
+Burp::pattern('number', '(\d+)');
+Burp::pattern('page', 'pg/(\d+)');
+Burp::pattern('slug', '([a-z0-9-]+)');
 
 Burp::get('articles/{page?}',...
 Burp::get('article/{slug}',...
 
 ```
-
+Important: you must use parenthesis to define the atom/s 
 
 ## helpers
 
