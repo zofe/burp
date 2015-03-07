@@ -9,8 +9,10 @@ You can use Burp in your preferred framework (Including laravel), It does not pr
 
 ## why
 
-The idea is to have a way to _work with your application urls_ and to define a "semantic" in your urls.<br />
-To make widgets that works driven by  uri-segments or query-string, without the need to have a classic controller.
+The idea is to have an "all in one" router,filter,event listener.  
+I'ts a way to build event-driven widgets and define a flexible "semantic" in application urls<br />
+
+Burp can power widgets that works driven by _uri-segments_,_query-string_ or both, without the need to have a classic controller.
 
 ## Installation
 
@@ -32,15 +34,6 @@ There are two main differences you need to know:
 
   - rules are non-blocking, It means that a single http request can trigger more than one route 
   
-```
-
-Burp::$http_method($uri_regex, $querystr_regex, array('as'=>$route_name, function($param) {
-    
-	//do something
-}));
-
-Burp::dispatch();
-```
 
 ## samples
 
