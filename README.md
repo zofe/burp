@@ -94,7 +94,7 @@ Burp::get('^/user/(\d+)$', null, array('as'=>'user.show', 'uses'=>'UsersControll
 ## usage - full example as front-controller
 
 
-if you need burp in a "stand-alone" minimal configuration, need a front controller.  
+if you need burp in a "stand-alone" context, you need a front controller.  
 You can start from this .htaccess (most of application framework already have something like this)
 
 
