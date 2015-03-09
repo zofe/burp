@@ -222,7 +222,6 @@ class Burp
     public function remove()
     {
         $routes = (is_array(func_get_arg(0))) ? func_get_arg(0) : func_get_args();
-
         end(self::$routes);
         self::$remove[key(self::$routes)] = $routes;
 
@@ -246,7 +245,7 @@ class Burp
         $qs = (isset($url_arr[1])) ? $url_arr[1] : '';
         if (!is_array($params)) $params = (array) $params;
         
-        //if a stric-uri?
+        //is a stric-uri?
         if (isset(self::$routes[$name][0]) and self::$routes[$name][0]=== '^') {
             $is_strict = true;
             $route = self::$routes[$name];
@@ -265,22 +264,23 @@ class Burp
             }
             
             if (self::$qs[$name]) {
-                $url = preg_replace('#(&?)'.self::$qs[$name].'#', '', $url);
+                $qs = preg_replace('#(&?)'.self::$qs[$name].'#', '', $qs);
             }
-            //return $url;//die($route);
-        
+            
         //non strict route
         } else {
             $is_strict = false;
             
             //If required we remove other routes (from segments and qs)
             if (count(self::$remove[$name])) {
+
                 foreach (self::$remove[$name] as $route) {
+
                     if (self::$routes[$route]) {
                         $url = preg_replace('#(\/?)'.self::$routes[$route].'#', '', $url);
                     }
                     if (self::$qs[$route]) {
-                        $url = preg_replace('#(&?)'.self::$qs[$route].'#', '', $url);
+                        $qs = preg_replace('#(&?)'.self::$qs[$route].'#', '', $qs);
                     }
 
                 }
