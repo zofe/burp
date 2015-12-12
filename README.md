@@ -16,7 +16,7 @@ Burp can power widgets that works driven by _uri-segments_,_query-string_ or bot
 
 ## Installation
 
-install via composer adding ```"zofe/burp": "1.0.*"```
+install via composer adding ```"zofe/burp": "3.0.*"```
 
 if you're using laravel add the service provider in config/app.php:
     
