@@ -9,11 +9,11 @@ namespace Zofe\Burp;
  *
  * @package Zofe\Burp
  *
- * @method public static get($uri=null, $query=null, Array $route)
- * @method public static post($uri=null, $query=null, Array $route)
- * @method public static patch($uri=null, $query=null, Array $route)
- * @method public static put($uri=null, $query=null, Array $route)
- * @method public static delete($uri=null, $query=null, Array $route)
+ * @method static get($uri=null, $query=null, Array $route)
+ * @method static post($uri=null, $query=null, Array $route)
+ * @method static patch($uri=null, $query=null, Array $route)
+ * @method static put($uri=null, $query=null, Array $route)
+ * @method static delete($uri=null, $query=null, Array $route)
  */
 class Burp
 {
@@ -101,13 +101,11 @@ class Burp
 
                     $matched = array_merge($matched, $qsmatched);
                     self::$catched[] = $name;
-                    //call_user_func_array(self::$callbacks[$name], $matched);
                     BurpEvent::listen($name, self::$callbacks[$name]);
                     BurpEvent::queue($name, $matched);
 
                 } elseif (self::$qs[$name] == '') {
                     self::$catched[] = $name;
-                    //call_user_func_array(self::$callbacks[$name], $matched);
                     BurpEvent::listen($name, self::$callbacks[$name]);
                     BurpEvent::queue($name, $matched);
                 }

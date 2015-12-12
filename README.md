@@ -170,41 +170,6 @@ Burp::get('article/{slug}',...
 ```
 Important: you must use parenthesis to define the atom/s 
 
-## helpers
-
-you can also use functions instead of static calls.
-- route_* works checking 'uri'
-- route_query  works only checking 'query string' (on any http method)
-
-
-```php
-
-route_get('^/', function () {
-    echo 'Welcome!';
-});
-
-route_any('^/test', function () {
-    echo 'This is a test';
-});
-
-route_query('ord=(-?)(\w+)', function ($direction, $field) {
-    echo 'This is a test';
-});
-route_missing(function () {
-    echo 'Page not found';
-});
-
-//you can still use named route and link to route
-
-route_get('explode=(\w+)', array('as'=>'bum',function ($name) {
-    die('BUM: '.$name);
-});
-
-//will return: /currenturi?explode=john
-echo link_route('bum', array('john'));
-
-
-route_dispatch();
 
 ```
 
@@ -281,7 +246,7 @@ public function getList()
     $links = preg_replace('@href="(.*\?page=(\d+))"@U', 
                           'href="'.Burp::linkRoute('page', '$2').'"', $links);
 
-    return View::make('articles.list', compact('articles','links'));
+    return view('articles.list', compact('articles','links'));
 }
 
 }
