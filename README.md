@@ -171,7 +171,7 @@ Burp::get('article/{slug}',...
 Important: you must use parenthesis to define the atom/s 
 
 
-```
+
 
 
 ## usage - in laravel 
