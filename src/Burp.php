@@ -1,6 +1,9 @@
 <?php
 
 namespace Zofe\Burp;
+use League\Uri\Components\Path;
+use League\Uri\Modifiers\AppendSegment;
+use League\Uri\Schemes\Http;
 
 /**
  * Class Burp
@@ -24,10 +27,23 @@ class Burp
     protected static $callbacks = array();
     protected static $patterns = array();
     protected static $parameters = array();
-    
+
     protected static $tocatch = array();
     protected static $catched = array();
     protected static $missing_callback;
+
+    public static function appendUri($uri, $url=null)
+    {
+        $url = self::http($url);
+        $modifier = new AppendSegment($uri);
+
+        return $modifier($url);
+    }
+
+    public static function http($url=null)
+    {
+        return ($url) ?  Http::createFromString($url) : Http::createFromServer($_SERVER);
+    }
 
     public static function missing(\Closure $missing)
     {
@@ -36,10 +52,12 @@ class Burp
 
     /**
      * little bit magic here, to catch all http methods to define a named route
+     * with a simple closure or
      * <code>
      *    Burp::get(null, 'page=(\d+)', array('as'=>'page', function ($page) {
      *        //with this query string: ?page=n  this closure will be triggered
      *    }));
+     *
      * </code>
      * @param $method
      * @param $params
@@ -58,7 +76,7 @@ class Burp
         self::$remove[$name] = array();
         self::$methods[$name] = strtoupper($method);
         self::$callbacks[$name] = $params[2]['uses'];
-        
+
         if (is_array($params[2]['uses'])) {
             $reflection = new \ReflectionMethod($params[2]['uses'][0], $params[2]['uses'][1]);
             self::$parameters[$name] =  $reflection->getParameters();
@@ -66,33 +84,137 @@ class Burp
             $reflection = new \ReflectionFunction($params[2]['uses']);
             self::$parameters[$name] =  $reflection->getParameters();
         }
-        
+
         //this is a strict rule
         if ($uri!= '' and $uri[0]=== '^') {
             self::$tocatch[] = $name;
         }
-        
+
         return new static();
     }
-    
+
+    /**
+     * check if route method call is correct, and try to fix if not
+     * @param $method
+     * @param $params
+     */
+    private static function fixParams($method, $params)
+    {
+        if (! in_array(strtolower($method), array('get','post','patch','put','delete','any','head')))
+            throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete','any','head'");
+
+        //fix closures / controllers
+        if (is_array($params) && isset($params[2]) && is_array($params[2])) {
+
+            //controller@method
+            if (isset($params[2]['uses']) && is_string($params[2]['uses']) && strpos($params[2]['uses'], '@')) {
+
+                $callback = explode('@', $params[2]['uses']);
+                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $callback);
+            }
+
+            //closure fix
+            if (isset($params[2]['as']) && isset($params[2][0]) && ($params[2][0] instanceof \Closure)) {
+                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $params[2][0]);
+            }
+        }
+
+        //no route name given, so route_name will be the first parameter
+        if (is_array($params) && isset($params[2]) && ($params[2] instanceof \Closure)) {
+            $params[2] = array('as'=>$params[0], 'uses'=>$params[2]);
+        }
+
+        if (count($params)<3 ||
+            !is_array($params[2]) ||
+            !array_key_exists('as', $params[2]) ||
+            !array_key_exists('uses', $params[2]) ||
+            !($params[2]['uses'] instanceof \Closure  || is_array($params[2]['uses'])) )
+            throw new \InvalidArgumentException('third parameter should be an array containing a
+                                                   valid callback : array(\'as\'=>\'routename\', function () { })  ');
+
+        return $params;
+    }
+
+    /**
+     * replace patterns with regex i.e. {id} with (\d+)
+     * if patternd is a route-name or a defined pattern
+     *
+     * @param $pattern
+     * @return string
+     */
+    protected static function parsePattern($pattern, $remove_conditional = false, $only_pattern = false)
+    {
+        $url = $pattern;
+        if (!preg_match_all('/\{(\w+\??)\}/is', $pattern, $matches)) {
+            return $url;
+        }
+
+        $replaces = $matches[1];
+        foreach ($replaces as $pattern) {
+            $conditional = (substr($pattern, -1, 1) === '?') ? true : false;
+            $pattern = rtrim($pattern, '?');
+
+            $url = self::replacePattern($pattern, self::$patterns, $url, $conditional, $remove_conditional);
+            if (array_key_exists($pattern, self::$patterns) && $only_pattern) {
+                return $url;
+            }
+            $url = self::replacePattern($pattern, self::$routes, $url, $conditional, $remove_conditional);
+            $url = self::replacePattern($pattern, self::$qs, $url, $conditional, $remove_conditional);
+
+        }
+
+        return $url;
+    }
+
+    /**
+     * replace a pattern in an array of rules
+     * container can be routes or querystring arrays
+     *
+     * @param $pattern
+     * @param $container
+     * @param $url
+     * @param $conditional
+     * @param $remove_conditional
+     * @return string
+     */
+    protected static function replacePattern($pattern, $container, $url, $conditional, $remove_conditional)
+    {
+        if (array_key_exists($pattern, $container)) {
+
+            if ($container === self::$patterns) {
+                $replace = self::$patterns[$pattern];
+            } else {
+                $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.$container[$pattern].')' : $container[$pattern];
+            }
+
+            if ($conditional) {
+                $replace = ($remove_conditional) ? '' : $replace.'?';
+                $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
+            } else {
+                $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
+            }
+
+        }
+
+        return $url;
+    }
+
     /**
      * dispatch the router: check for all defined routes and call closures
      */
     public static function dispatch()
     {
-        $uri = strtok($_SERVER["REQUEST_URI"],'?');
-        $qs = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
-        $method = $_SERVER['REQUEST_METHOD'];
-        
-        
-        foreach (self::$routes as $name=>$route) {
+        $uri = self::uri();
+        $qs = self::qs();
+        $method = self::method();
 
+        foreach (self::$routes as $name=>$route) {
 
             $route  = self::parsePattern($route);
 
             $matched = array();
             if ($route=='' || preg_match('#' . $route . '#', $uri, $matched) && (self::$methods[$name] == 'ANY' || self::$methods[$name] == $method)) {
-                
+
                 array_shift($matched);
 
                 if (self::$qs[$name]!='' && preg_match('#' . self::$qs[$name] . '#', $qs, $qsmatched)) {
@@ -120,19 +242,32 @@ class Burp
                 call_user_func(self::$missing_callback);
                 BurpEvent::listen('missing', self::$callbacks[$name]);
                 BurpEvent::fire('missing');
-
             }
-
         }
 
         BurpEvent::flushAll();
     }
 
+    public static function uri($url=null)
+    {
+        return (new Path(self::http($url)->getPath()))->withoutEmptySegments();
+    }
+
+    public static function qs($url=null)
+    {
+        return self::http($url)->getQuery();
+    }
+
+    public static function method()
+    {
+        return $_SERVER['REQUEST_METHOD'];
+    }
+
     public static function isRoute($name, $params = array())
     {
-        $uri = strtok($_SERVER["REQUEST_URI"],'?');
-        $qs = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
-        $method = $_SERVER['REQUEST_METHOD'];
+        $uri = self::uri();
+        $qs = self::qs();
+        $method = self::method();
         $route = @self::$routes[$name];
 
         $matched = array();
@@ -145,15 +280,15 @@ class Burp
                 array_shift($qsmatched);
 
                 $matched = array_merge($matched, $qsmatched);
-                
+
                 if (count($params)) {
                    return  ($matched == $params) ? true : false;
                 } else {
                     return true;
                 }
-                
+
             } elseif (@self::$qs[$name] == '') {
-                
+
                 if (count($params)) {
                     return  ($matched == $params) ? true : false;
                 } else {
@@ -167,66 +302,6 @@ class Burp
     }
 
     /**
-     * check if route method call is correct, and try to fix if not
-     * @param $method
-     * @param $params
-     */
-    private static function fixParams($method, $params)
-    {
-        if (! in_array(strtolower($method), array('get','post','patch','put','delete','any','head')))
-            throw new \BadMethodCallException("valid methods are 'get','post','patch','put','delete','any','head'");
-
-
-        //fix closures / controllers 
-        if  (is_array($params) && isset($params[2]) && is_array($params[2])) {
-
-            
-            //controller@method
-            if (isset($params[2]['uses']) && is_string($params[2]['uses']) && strpos($params[2]['uses'], '@'))
-            {
-               
-                $callback = explode('@', $params[2]['uses']);
-                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $callback);
-            }
-            
-            //closure fix
-            if (isset($params[2]['as']) && isset($params[2][0]) && ($params[2][0] instanceof \Closure))
-            {
-                $params[2] = array('as'=>$params[2]['as'], 'uses'=> $params[2][0]);
-            }
-        }
-        
-        //no route name given, so route_name will be the first parameter
-        if  (is_array($params) && isset($params[2]) && ($params[2] instanceof \Closure)) {
-            $params[2] = array('as'=>$params[0], 'uses'=>$params[2]);
-        }
-        
-        if (count($params)<3 ||
-            !is_array($params[2]) ||
-            !array_key_exists('as', $params[2]) ||
-            !array_key_exists('uses', $params[2]) ||
-            !($params[2]['uses'] instanceof \Closure  || is_array($params[2]['uses'])) )
-            throw new \InvalidArgumentException('third parameter should be an array containing a
-                                                   valid callback : array(\'as\'=>\'routename\', function () { })  ');
-        
-        return $params;
-    }
-
-    /**
-     * queque to remove from url one or more named route
-     *
-     * @return static
-     */
-    public function remove()
-    {
-        $routes = (is_array(func_get_arg(0))) ? func_get_arg(0) : func_get_args();
-        end(self::$routes);
-        self::$remove[key(self::$routes)] = $routes;
-
-        return new static();
-    }
-
-    /**
      * return a link starting from routename and params
      * like laravel link_to_route() but working with rapyd widgets/params
      *
@@ -236,13 +311,11 @@ class Burp
      */
     public static function linkRoute($name, $params = array(), $url = null)
     {
-        //starting defining url and qs
-        $url = ($url != '') ? $url : $_SERVER["REQUEST_URI"];
-        $url_arr = explode('?', $url);
-        $url = $url_arr[0];
-        $qs = (isset($url_arr[1])) ? $url_arr[1] : '';
+        $qs = self::qs($url);
+        $url = self::uri($url);
+
         if (!is_array($params)) $params = (array) $params;
-        
+
         //is a stric-uri?
         if (isset(self::$routes[$name][0]) and self::$routes[$name][0]=== '^') {
             $is_strict = true;
@@ -260,15 +333,15 @@ class Burp
                     $url = str_replace($matches[0][$key],$param, $url);
                 }
             }
-            
+
             if (self::$qs[$name]) {
                 $qs = preg_replace('#(&?)'.self::$qs[$name].'#', '', $qs);
             }
-            
+
         //non strict route
         } else {
             $is_strict = false;
-            
+
             //If required we remove other routes (from segments and qs)
             if (count(self::$remove[$name])) {
 
@@ -288,21 +361,22 @@ class Burp
             //I check for all params to build the append segment with given params,
             //then I strip current rule and append new one.
             if (self::$routes[$name]) {
+
                 $append =  self::$routes[$name];
                 if (preg_match_all('#\(.*\)#U',$append, $matches)) {
                     foreach ($params as $key=>$param) {
                         $append = str_replace($matches[0][$key],$param, $append);
                     }
                 }
+
                 $url = preg_replace('#(\/?)'.self::$routes[$name].'#', '', $url);
                 $url = $url."/".$append;
                 $url = str_replace('//','/',$url);
 
             }
-            
+
         }
 
-        
         //if this route works on query string
         //I check for all params to buid and "append" or "replace" query string with given params.
         $append = '';
@@ -328,10 +402,10 @@ class Burp
 
     /**
      * return a plain html link
-     * 
+     *
      * @param $url
-     * @param null $title
-     * @param array $attributes
+     * @param  null   $title
+     * @param  array  $attributes
      * @return string
      */
     public static function linkUrl($url, $title = null, $attributes = array())
@@ -344,6 +418,7 @@ class Burp
                 $compiled .= ' ' . $key . '="' .  htmlspecialchars((string) $val, ENT_QUOTES, "UTF-8", true) . '"';
             }
         }
+
         return '<a href="'.$url.'"'.$compiled.'>'.$title.'</a>';
     }
 
@@ -351,7 +426,7 @@ class Burp
      * global regex pattern with a reusable name
      * adds the ability do define:  Burp::pattern('page', 'pg/\d+');
      * and reuse it na a route definition:  Burp::get('articles/{page?}',...
-     * 
+     *
      * @param $name
      * @param $pattern
      */
@@ -361,67 +436,16 @@ class Burp
     }
 
     /**
-     * replace a pattern in an array of rules
+     * queque to remove from url one or more named route
      *
-     * @param $pattern
-     * @param $container
-     * @param $url
-     * @param $conditional
-     * @param $remove_conditional
-     * @return string
+     * @return static
      */
-    protected static function replacePattern($pattern, $container, $url, $conditional, $remove_conditional)
+    public function remove()
     {
-        if (array_key_exists($pattern, $container)) {
-            $replace = (count(self::$parameters[$pattern]) || $conditional) ? '('.$container[$pattern].')' : $container[$pattern];
-            if ($conditional) {
-                $replace = ($remove_conditional) ? '' : $replace.'?';
-                $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
-            } else {
-                $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
-            }
-        }
-        return $url;
-    }
-    
-    /**
-     * replace patterns with regex i.e. {id} with (\d+)  
-     * if patternd is a route-name or a defined pattern 
-     * 
-     * @param $pattern
-     * @return string
-     */
-    protected static function parsePattern($pattern, $remove_conditional = false, $only_pattern = false)
-    {
-        $url = $pattern;
-        if (!preg_match_all('/\{(\w+\??)\}/is', $pattern, $matches)) {
-            return $url;
-        }
-        
-        $replaces = $matches[1];
-        foreach ($replaces as $pattern) {
-            $conditional = (substr($pattern, -1, 1) === '?') ? true : false;
-            $pattern = rtrim($pattern, '?');
+        $routes = (is_array(func_get_arg(0))) ? func_get_arg(0) : func_get_args();
+        end(self::$routes);
+        self::$remove[key(self::$routes)] = $routes;
 
-            if (array_key_exists($pattern, self::$patterns)) {
-
-                $replace = self::$patterns[$pattern];
-                if ($conditional) {
-                    $replace = ($remove_conditional) ? '' : $replace.'?';
-                    $url = preg_replace('#\{'.$pattern.'\?\}#', $replace, $url);
-                    
-                } else {
-                    $url = preg_replace('#\{'.$pattern.'\}#', $replace, $url);
-                }
-                $pattern = $url;
-                if ($only_pattern) return $pattern;
-            }
-
-            $url = self::replacePattern($pattern, self::$routes, $url, $conditional, $remove_conditional);
-            $url = self::replacePattern($pattern, self::$qs, $url, $conditional, $remove_conditional);
-            
-
-        }
-        return $url;
+        return new static();
     }
 }
